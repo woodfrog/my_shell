@@ -8,6 +8,9 @@ int main(void)
 	while(true)
 	{
 		print_prompt();
+		
+		char commond[20];
+		
 		parse_commond(commond, parameters);
 		
 		

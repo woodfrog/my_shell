@@ -1,4 +1,22 @@
 #include "command_parser.h"
+#include "debug.h"
+
+
+void parse_commond(char *commond, char **parameters)
+{
+	
+	
+	
+	
+	
+	
+	
+}
+
+
+
+
+
 
 #ifdef DEBUG
 int main()
