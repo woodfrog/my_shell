@@ -1,9 +1,7 @@
 #ifndef PROMPT_H
 #define PROMPT_H
-#include <stdio.h>
 #include <unistd.h>
-#include <string.h>
-#include "debug.h"
+#include "common.h"
 
 
 

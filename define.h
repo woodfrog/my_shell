@@ -1,6 +1,6 @@
 /*This header is to define the basic types used in this program.*/
 
-enum CommondType{
+enum CommandType{
     cd,
     exit,
     jobs,

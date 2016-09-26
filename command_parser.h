@@ -1,11 +1,10 @@
 #ifndef PARSER_H
 #define PARSER_H
-#include <string.h>
-#include <stdio.h>
+#include "structure.h"
+#include "common.h"
 
-
-void parse_commond(commond *commond, char **parameters);
-
+void parse_commond(Command *commond);
+bool find_pipe(char *s, int start_index, int end_index);
 
 
 #endif
