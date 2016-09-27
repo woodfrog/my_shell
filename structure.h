@@ -14,16 +14,15 @@ typedef struct parameter{
     struct parameter *next;
 } Parameter;
 
-
+// typedef struct parameter_list{
+//     Parameter *head;
+//     Parameter *tail;
+// } ParameterList;
 
 typedef struct command{
     char name[20];
     struct parameter *p_parameter;
     struct command *next; // point to the next commond
 } Command;
-
-
-
-
 
 #endif

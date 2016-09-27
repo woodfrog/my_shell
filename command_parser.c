@@ -28,6 +28,8 @@ void parse_commond(Command *commond)
 	
 	printf("address of the init str:%p\n", line);
 	
+	bool command_flag = true; // the first token should be the command name
+	
 	for (token = strtok_r(line_copy, sep, &brk_t);
 		 token;
 		 token = strtok_r(NULL, sep, &brk_t))
@@ -36,12 +38,17 @@ void parse_commond(Command *commond)
 									token - line_copy);
 		if (is_pipe){
 			printf("pipe found between %s and %s", last_token, token);
+			// create a command node according to token
+			// add the node into the command list
 		}
 		else{
-			printf("address is:%p, content:%s\n", token, token);
-			// operations to deal with the same command 
-			// 1. store the command name
-			// 2. store the parameters into the list for parameter
+			if (command_flag){
+				command_flag = false;
+				//create a command node
+			}
+			else{
+				// add parameter node into parameter list
+			}
 		}
 		last_token = token;
 	}
