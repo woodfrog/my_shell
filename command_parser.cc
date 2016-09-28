@@ -15,7 +15,8 @@ bool find_pipe(char *s, int start, int end)
 	}
 }
 
-void parse_commond(Command *commond)
+
+void parse_commond(std::list<Command> &command_list)
 {
 	char line[80], line_copy[80];
 	fgets(line, sizeof(line), stdin);
@@ -26,10 +27,11 @@ void parse_commond(Command *commond)
 	char *token, *brk_t, *last_token;
 	last_token = line_copy;
 	
-	printf("address of the init str:%p\n", line);
+	// printf("address of the init str:%p\n", line);
 	
 	bool command_flag = true; // the first token should be the command name
 	
+	Command new_command;
 	for (token = strtok_r(line_copy, sep, &brk_t);
 		 token;
 		 token = strtok_r(NULL, sep, &brk_t))
@@ -38,29 +40,37 @@ void parse_commond(Command *commond)
 									token - line_copy);
 		if (is_pipe){
 			printf("pipe found between %s and %s", last_token, token);
-			// create a command node according to token
-			// add the node into the command list
+			command_list.push_back(new_command); // add the last command into list
+			new_command = Command(token); // create a new command
 		}
 		else{
 			if (command_flag){
 				command_flag = false;
-				//create a command node
+				new_command = Command(token); // create a new command
 			}
 			else{
-				// add parameter node into parameter list
+				Parameter new_parameter = Parameter(token);
+				new_command.add_parameter(new_parameter); // add new para into current command
 			}
 		}
 		last_token = token;
 	}
+	command_list.push_back(new_command);
 }
 
 
 #ifdef DEBUG
+using namespace std;
 int main()
 {
 	while(true){
-		Command *p;
-		parse_commond(p);
+		list<Command> cl;
+		parse_commond(cl);
+		list<Command>::iterator iter;
+		for (iter = cl.begin(); iter!=cl.end(); ++iter){
+			iter->show_parameters();
+			cout << "the command name:" << iter->name << endl;
+		}		
 	}
 }
 #endif
