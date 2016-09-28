@@ -3,9 +3,11 @@ be included in other headers in this project.*/
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
+#include <iostream>
 #include <stdbool.h>
+#include <string>
 #define DEBUG 
 
 

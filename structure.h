@@ -8,21 +8,34 @@
 #ifndef STRUCTURE_H
 #define STRUCTURE_H
 #include "common.h"
+#include <list>
+#include <string.h>
 
-typedef struct parameter{
+
+class Parameter{
+public:
     char content[20];
-    struct parameter *next;
-} Parameter;
+    
+    Parameter(char *content){
+        strncpy(this->content, content, sizeof(this->content));
+    }
+};
 
-// typedef struct parameter_list{
-//     Parameter *head;
-//     Parameter *tail;
-// } ParameterList;
 
-typedef struct command{
+class Command{
+public:
     char name[20];
-    struct parameter *p_parameter;
-    struct command *next; // point to the next commond
-} Command;
+    std::list<Parameter> parameters;
+    
+    Command(){}
+    
+    Command(char *name){
+        strncpy(this->name, name, sizeof(this->name));
+    }
+    
+    void add_parameter(Parameter p);
+    void show_parameters();
+};
+
 
 #endif
