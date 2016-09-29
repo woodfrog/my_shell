@@ -6,5 +6,4 @@
 void parse_commond(std::list<Command> &command_list);
 bool find_pipe(char *s, int start_index, int end_index);
 
-
 #endif

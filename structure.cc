@@ -15,6 +15,18 @@ void Command::show_parameters()
     }
 }
 
+void Command::check_type()
+{
+	if (name == "cd")
+		type = cd;
+	else if(name =="exit")
+		type = exit;
+	else if(name == "jobs")
+		type = jobs;
+	else
+		type = non_built_in;
+}
+
 
 // #ifdef DEBUG
 // using namespace std;

@@ -20,14 +20,13 @@ void parse_commond(std::list<Command> &command_list)
 {
 	char line[80], line_copy[80];
 	fgets(line, sizeof(line), stdin);
+	size_t len = strlen(line);
+	line[len-1] = '\0'; 
 	strncpy(line_copy, line, sizeof(line_copy));
-	puts(line);
 	
 	char *sep = "\t |"; //separators: space, \t, or pipe
 	char *token, *brk_t, *last_token;
 	last_token = line_copy;
-	
-	// printf("address of the init str:%p\n", line);
 	
 	bool command_flag = true; // the first token should be the command name
 	
@@ -68,8 +67,9 @@ int main()
 		parse_commond(cl);
 		list<Command>::iterator iter;
 		for (iter = cl.begin(); iter!=cl.end(); ++iter){
-			iter->show_parameters();
-			cout << "the command name:" << iter->name << endl;
+			iter->check_type();
+			// execute_command(*iter);
+			cout << "the command name:" << iter->name << "type:" << iter->type << endl;
 		}		
 	}
 }

@@ -11,31 +11,39 @@
 #include <list>
 #include <string.h>
 
+enum CommandType{
+    cd,
+    exit,
+    jobs,
+    non_built_in
+};
 
 class Parameter{
 public:
-    char content[20];
+    std::string content;
     
     Parameter(char *content){
-        strncpy(this->content, content, sizeof(this->content));
+        this->content = content;
     }
 };
 
 
 class Command{
 public:
-    char name[20];
+    std::string name;
     std::list<Parameter> parameters;
+    CommandType type;
     
     Command(){}
     
     Command(char *name){
-        strncpy(this->name, name, sizeof(this->name));
+        this->name = name;
     }
-    
     void add_parameter(Parameter p);
     void show_parameters();
+    void check_type();
 };
+
 
 
 #endif
