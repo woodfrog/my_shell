@@ -12,10 +12,12 @@
 #include <string.h>
 
 enum CommandType{
-    cd,
-    exit,
-    jobs,
-    non_built_in
+    CD,
+    EXIT,
+    JOBS,
+    FG,
+    BG,
+    NON_BUILT_IN
 };
 
 class Parameter{
@@ -41,7 +43,7 @@ public:
     }
     void add_parameter(Parameter p);
     void show_parameters();
-    void check_type();
+    CommandType check_type();
 };
 
 

@@ -15,16 +15,21 @@ void Command::show_parameters()
     }
 }
 
-void Command::check_type()
+CommandType Command::check_type()
 {
 	if (name == "cd")
-		type = cd;
+		type = CD;
 	else if(name =="exit")
-		type = exit;
+		type = EXIT;
 	else if(name == "jobs")
-		type = jobs;
+		type = JOBS;
+	else if(name == "fg")
+		type = FG;
+	else if(name == "bg")
+		type = BG;
 	else
-		type = non_built_in;
+		type = NON_BUILT_IN;
+	return type;
 }
 
 
