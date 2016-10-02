@@ -9,8 +9,7 @@ void Command::add_parameter(Parameter p)
 
 void Command::show_parameters()
 {
-    std::list<Parameter>::iterator iter;
-    for (iter = parameters.begin(); iter != parameters.end(); iter++){
+    for (auto iter = parameters.begin(); iter != parameters.end(); iter++){
         std::cout << iter->content << std::endl; 
     }
 }
@@ -27,10 +26,18 @@ CommandType Command::check_type()
 		type = FG;
 	else if(name == "bg")
 		type = BG;
+	else if(name == "")
+		type = EMPTY;
 	else
 		type = NON_BUILT_IN;
 	return type;
 }
+
+size_t Command::parameter_len()
+{
+	return parameters.size();
+}
+
 
 
 // #ifdef DEBUG

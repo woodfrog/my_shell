@@ -23,8 +23,9 @@ void parse_commond(std::list<Command> &command_list)
 	size_t len = strlen(line);
 	line[len-1] = '\0'; 
 	strncpy(line_copy, line, sizeof(line_copy));
-	
-	char *sep = "\t |"; //separators: space, \t, or pipe
+
+	std::string sep_string = "\t |\n"; 	
+	const char *sep = sep_string.c_str(); //separators: space, \t, or pipe
 	char *token, *brk_t, *last_token;
 	last_token = line_copy;
 	
@@ -35,6 +36,7 @@ void parse_commond(std::list<Command> &command_list)
 		 token;
 		 token = strtok_r(NULL, sep, &brk_t))
 	{
+		// printf("toke name :%s\n", token);
 		bool is_pipe = find_pipe(line, last_token - line_copy, 
 									token - line_copy);
 		if (is_pipe){
@@ -65,8 +67,7 @@ int main()
 	while(true){
 		list<Command> cl;
 		parse_commond(cl);
-		list<Command>::iterator iter;
-		for (iter = cl.begin(); iter!=cl.end(); ++iter){
+		for (auto iter = cl.begin(); iter!=cl.end(); ++iter){
 			iter->check_type();
 			// execute_command(*iter);
 			cout << "the command name:" << iter->name << "type:" << iter->type << endl;

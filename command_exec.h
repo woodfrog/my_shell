@@ -3,7 +3,7 @@
 #include "common.h"
 #include "structure.h"
 
-// void exec_command(Command c); // return type not determined yet
+void exec_command(Command c); // return type not determined yet
 
 
 

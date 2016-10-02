@@ -1,30 +1,26 @@
 #include <stdio.h>
 #include "command_parser.h"
 #include "prompt.h"
+#include "command_exec.h"
 #include "common.h"
 #include <list>
 
-int main(void)
-{
-	while(true)
-	{
-		print_prompt();
-		
-		std::list<Command> commond_list;
-		
-		parse_commond(commond_list);
+using namespace std;
+
+int main(void) {
+    while (true) {
+        print_prompt();
+
+        std::list<Command> commond_list;
+
+        parse_commond(commond_list);
 
 
-		
-		// if (fork() != 0){
-		// // parent
-		
-		// }		
-		// else{
-		// // child
-		
-		// }
+        for (auto iter = commond_list.begin(); iter != commond_list.end(); iter++) {
+            exec_command(*iter);
+        }
 
-	}	
-	return 0;
+
+    }
+    return 0;
 }

@@ -17,7 +17,8 @@ enum CommandType{
     JOBS,
     FG,
     BG,
-    NON_BUILT_IN
+    NON_BUILT_IN,
+    EMPTY
 };
 
 class Parameter{
@@ -44,6 +45,7 @@ public:
     void add_parameter(Parameter p);
     void show_parameters();
     CommandType check_type();
+    size_t parameter_len();
 };
 
 

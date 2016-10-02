@@ -1,6 +1,5 @@
 #ifndef PROMPT_H
 #define PROMPT_H
-#include <unistd.h>
 #include "common.h"
 
 

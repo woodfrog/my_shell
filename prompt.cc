@@ -13,7 +13,7 @@ void adjust_dir_name(char *abs_dir, char *last_dir)
             p2 = p1;
         p1++;
     } // p2 now point to the last '/'
-    strncpy(last_dir, p2, strlen(p2)); // cannot use sizeof(last_dir) here --> it's the size of ptr
+    strncpy(last_dir, p2+1, strlen(p2)); // cannot use sizeof(last_dir) here --> it's the size of ptr
 
 }
 
@@ -28,7 +28,7 @@ void print_prompt()
     getcwd(cwd, sizeof(cwd));
     adjust_dir_name(cwd, last_dir);
     
-    printf("%s@%s: %s $ ", username, hostname, last_dir);
+    printf("[%s@%s]: %s $ ", username, hostname, last_dir);
 }
 
 #ifdef DEBUG

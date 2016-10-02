@@ -9,7 +9,9 @@ be included in other headers in this project.*/
 #include <stdbool.h>
 #include <string>
 #include <stdlib.h>
-#define DEBUG 
+#include <sys/types.h>
+#include <unistd.h>
+// #define DEBUG 
 
 
 #endif
