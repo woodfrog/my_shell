@@ -38,7 +38,7 @@ void parse_commond(std::list<Command> &command_list)
 		bool is_pipe = find_pipe(line, last_token - line_copy, 
 									token - line_copy);
 		if (is_pipe){
-			printf("pipe found between %s and %s", last_token, token);
+			printf("pipe found between %s and %s\n", last_token, token);
 			command_list.push_back(new_command); // add the last command into list
 			new_command = Command(token); // create a new command
 		}

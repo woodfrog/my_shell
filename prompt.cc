@@ -13,21 +13,22 @@ void adjust_dir_name(char *abs_dir, char *last_dir)
             p2 = p1;
         p1++;
     } // p2 now point to the last '/'
-    strncpy(last_dir, p2, sizeof(last_dir));
+    strncpy(last_dir, p2, strlen(p2)); // cannot use sizeof(last_dir) here --> it's the size of ptr
+
 }
 
 
 void print_prompt()
 {
     char *username = getlogin(); // return a string in static memory, no need for free 
-    char hostname[20];
-    char last_dir[20];
+    char hostname[20] = "";
+    char last_dir[80] = "";
+    char cwd[80] = "";
     gethostname(hostname, sizeof(hostname));
-    char *current_dir = get_current_dir_name();
-    adjust_dir_name(current_dir, last_dir);
+    getcwd(cwd, sizeof(cwd));
+    adjust_dir_name(cwd, last_dir);
     
-    printf("%s@%s: \%s$ ", username, hostname, last_dir);
-    free(current_dir);
+    printf("%s@%s: %s $ ", username, hostname, last_dir);
 }
 
 #ifdef DEBUG

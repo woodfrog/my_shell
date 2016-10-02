@@ -8,6 +8,7 @@ be included in other headers in this project.*/
 #include <iostream>
 #include <stdbool.h>
 #include <string>
+#include <stdlib.h>
 #define DEBUG 
 
 

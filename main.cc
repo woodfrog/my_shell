@@ -1,7 +1,8 @@
 #include <stdio.h>
-#include "commond_parser.h"
+#include "command_parser.h"
 #include "prompt.h"
 #include "common.h"
+#include <list>
 
 int main(void)
 {
@@ -9,19 +10,20 @@ int main(void)
 	{
 		print_prompt();
 		
-		char commond[20];
+		std::list<Command> commond_list;
 		
-		parse_commond(commond, parameters);
+		parse_commond(commond_list);
+
+
 		
+		// if (fork() != 0){
+		// // parent
 		
-		if (fork() != 0){
-		// parent
+		// }		
+		// else{
+		// // child
 		
-		}		
-		else{
-		// child
-		
-		}
+		// }
 
 	}	
 	return 0;
