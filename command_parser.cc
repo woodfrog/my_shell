@@ -15,13 +15,31 @@ bool find_pipe(char *s, int start, int end)
 	}
 }
 
+bool handle_bg_symbol(char *s)
+{
+	size_t len = strlen(s);
+	for (int i = len-1; i >= 0; i--){
+		if (s[i] != ' ' && s[i] != '&')
+			return false;
+		else if (s[i] == ' ')
+			continue;
+		else{
+			s[i] = '\0'; //throw the & symbol since it has been detected.
+			return true;
+		}
+	}
+	return false;
+}
+
 
 void parse_commond(std::list<Command> &command_list)
 {
 	char line[80], line_copy[80];
 	fgets(line, sizeof(line), stdin);
 	size_t len = strlen(line);
-	line[len-1] = '\0'; 
+	line[len-1] = '\0'; // throw the \n at the end which is captured by fgets
+	bool is_bg = handle_bg_symbol(line);
+	// std::cout <<  "bg symbol" << is_bg << std::endl;
 	strncpy(line_copy, line, sizeof(line_copy));
 
 	std::string sep_string = "\t |\n"; 	
@@ -40,7 +58,7 @@ void parse_commond(std::list<Command> &command_list)
 		bool is_pipe = find_pipe(line, last_token - line_copy, 
 									token - line_copy);
 		if (is_pipe){
-			printf("pipe found between %s and %s\n", last_token, token);
+			// printf("pipe found between %s and %s\n", last_token, token);
 			command_list.push_back(new_command); // add the last command into list
 			new_command = Command(token); // create a new command
 		}

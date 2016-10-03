@@ -11,7 +11,10 @@ be included in other headers in this project.*/
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <signal.h>
 // #define DEBUG 
+
+
 
 
 #endif
