@@ -32,7 +32,7 @@ bool handle_bg_symbol(char *s)
 }
 
 
-void parse_commond(std::list<Command> &command_list)
+void parse_commonds(std::list<Command> &command_list)
 {
 	char line[80], line_copy[80];
 	fgets(line, sizeof(line), stdin);
