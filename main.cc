@@ -14,16 +14,18 @@ int main(void) {
 		// signal(SIGINT, SIG_IGN);
         print_prompt();
 
-        std::list<Command> commond_list;
+        std::list<Command> command_list;
 
-        parse_commond(commond_list);
+        parse_commonds(command_list);
 
-
-       	exec_piped_commands(commond_list); 
-        // for (auto iter = commond_list.begin(); iter != commond_list.end(); iter++) {
-        //     // printf("%s\n", iter->name.c_str());
-        //     exec_command(*iter);
+        // test for parser1 
+        // for (auto iter = command_list.begin(); iter != command_list.end(); iter++) {
+        //     printf("%s\n", iter->name.c_str());
+        //     iter->show_parameters();
         // }
+        
+        exec_commands(command_list);
+        
 
 
     }

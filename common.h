@@ -10,8 +10,12 @@ be included in other headers in this project.*/
 #include <string>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sysexits.h>
+#include <errno.h>
+
 // #define DEBUG 
 
 
