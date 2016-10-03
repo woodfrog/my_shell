@@ -3,8 +3,8 @@
 #include "common.h"
 #include "structure.h"
 
-void exec_command(Command c); // return type not determined yet
-void exec_piped_commands(const std::list<Command> &command_list);
+void exec_commands(std::list<Command> &command_list); // return type not determined yet
+void exec_piped_commands(std::list<Command> &command_list);
 
 
 
