@@ -48,6 +48,10 @@ public:
     size_t parameter_len();
 };
 
+// class Job{
+//   std::list<Command> commands;
+    
+// };
 
 
 #endif
