@@ -11,7 +11,9 @@ void exec_commands(std::list<Command> &command_list)
 		case CD :
 		{
 			std::string dir_name = c.parameters.front().content; // cd always has one parameter_len
-			chdir(dir_name.c_str());
+			int cd_status = chdir(dir_name.c_str());
+			if (cd_status < 0)
+				perror("chdir");
 			break;
 		}
 		case JOBS :
@@ -20,7 +22,7 @@ void exec_commands(std::list<Command> &command_list)
 			break;
 		case BG :
 			break;
-		case EMPTY:
+		case EMPTY: //empty, just skip
 			break;
 		default : // execute external commands
 			exec_piped_commands(command_list);
@@ -36,7 +38,7 @@ void exec_piped_commands(std::list<Command> &command_list)
 	// create all pipes
 	for (int i = 0; i < number_of_pipes; i++){
 		if ( pipe(fds + i*2) < 0){
-			perror("create pipe failed");
+			perror("pipe");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -61,34 +63,28 @@ void exec_piped_commands(std::list<Command> &command_list)
         		close(fds[i]);
     		}
 			
-			char ** args = new char* [iter->parameter_len() + 2]; // one for command name, one for NULL
-			args[0] = new char[iter->name.size()];
-			strncpy(args[0], iter->name.c_str(), iter->name.size());
+			char *args[ 2 + iter->parameter_len()]; // one for command name, one for NULL
+			args[0] = (char*)iter->name.c_str();
 			size_t index = 1;
-			// std::cout << "args length: " << iter->parameter_len() << std::endl;
+			
 			for(auto iter2 = iter->parameters.begin(); 
 				iter2!=iter->parameters.end(); 
 				iter2++, index++)
 			{
-				args[index] = new char[iter2->content.size()];
-				strncpy(args[index], iter2->content.c_str(), iter2->content.size());
-				// std::cout << "args: " << args[index] << std::endl;			
+				args[index] = (char*)iter2->content.c_str();			
 			}
 			
 			args[index] = NULL; // the last one should be NULL
 			
 			if (execvp(iter->name.c_str(), args) < 0 ){ 
 				// cleanup if failed !
-				for(size_t i = 0; i < iter->parameter_len()+2; i++)
-					delete[] args[i];
-				delete[] args;
-				perror("child failed");
+				perror("child");
 				exit(EXIT_FAILURE);
 			}
 		}
 		
 		else if (pid < 0){
-			fprintf(stderr, "Fork Failed in exec_command");
+			perror("fork");
 		}
 	}
 
