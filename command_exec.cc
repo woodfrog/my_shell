@@ -9,8 +9,11 @@ void exec_commands(std::list<Command> &command_list)
 			exit(0);
 			break;
 		case CD :
-			// std::string des_name = c.parameters.front().content
+		{
+			std::string dir_name = c.parameters.front().content; // cd always has one parameter_len
+			chdir(dir_name.c_str());
 			break;
+		}
 		case JOBS :
 			break;
 		case FG :
@@ -45,11 +48,13 @@ void exec_piped_commands(std::list<Command> &command_list)
 			//child 
 			
 			if (i != 0){ // not the first command in the list
-				dup2(fds[(i-1)*2], 0);
+				close(STDIN_FILENO);
+				dup2(fds[(i-1)*2], STDIN_FILENO);
 			}
 
 			if (i != command_list.size() -1 ){ // not the last command in the list
-				dup2(fds[i*2+1], 1);
+				close(STDOUT_FILENO);
+				dup2(fds[i*2+1], STDOUT_FILENO);
 			}
 
 			for(int i = 0; i < 2*number_of_pipes; i++){ // close all pipes in child
