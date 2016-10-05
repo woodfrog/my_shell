@@ -1,5 +1,6 @@
 /* The common settings for the whole project, this header should 
 be included in other headers in this project.*/
+
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -15,6 +16,7 @@ be included in other headers in this project.*/
 #include <signal.h>
 #include <sysexits.h>
 #include <errno.h>
+#include <termios.h>
 
 // #define DEBUG 
 

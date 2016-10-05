@@ -1,9 +1,9 @@
 #ifndef PARSER_H
 #define PARSER_H
-#include "structure.h"
+#include "basic.h"
 #include "common.h"
 
-void parse_commonds(std::list<Command> &command_list);
+void parse_job(Job &job);
 bool find_pipe(char *s, int start_index, int end_index);
 bool handle_bg_symbol(char *s);
 

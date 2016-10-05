@@ -6,8 +6,8 @@ CFLAGS  = -g -Wall -std=c++11
 all: my_shell
 
 
-my_shell:  main.o command_parser.o command_exec.o structure.o prompt.o
-	$(CC) $(CFLAGS) -o my_shell command_parser.o command_exec.o structure.o prompt.o main.o
+my_shell:  main.o command_parser.o command_exec.o basic.o prompt.o
+	$(CC) $(CFLAGS) -o my_shell command_parser.o command_exec.o basic.o prompt.o main.o
 
 
 main.o: main.cc
@@ -16,14 +16,17 @@ main.o: main.cc
 prompt.o: prompt.cc prompt.h
 	$(CC) $(CFLAGS) -c prompt.cc
 
-structure.o:  structure.cc structure.h common.h
-	$(CC) $(CFLAGS) -c structure.cc
+basic.o:  basic.cc basic.h common.h
+	$(CC) $(CFLAGS) -c basic.cc
 
-command_parser.o:  command_parser.cc command_parser.h common.h structure.h 
+command_parser.o:  command_parser.cc command_parser.h common.h basic.h 
 	$(CC) $(CFLAGS) -c command_parser.cc
 
-command_exec.o:  command_exec.cc command_exec.h common.h structure.h
+command_exec.o:  command_exec.cc command_exec.h common.h basic.h
 	$(CC) $(CFLAGS) -c command_exec.cc
+	
+job_control.o: job_control.cc common.h job_control.h
+	$(CC) $(CFLAGS) -c job_control.cc
 
 clean: 
 	$(RM)  *.o *~

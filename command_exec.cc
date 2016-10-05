@@ -1,8 +1,8 @@
 #include "command_exec.h"
 
-void exec_commands(std::list<Command> &command_list)
+void exec_job(Job &job)
 {
-	auto c = command_list.front(); // if c is not external command, then command_list only has one element.
+	auto c = job.commands.front(); // if c is not external command, then command_list only has one element.
 	c.check_type();
 	switch(c.type){
 		case EXIT :
@@ -13,26 +13,29 @@ void exec_commands(std::list<Command> &command_list)
 			std::string dir_name = c.parameters.front().content; // cd always has one parameter_len
 			int cd_status = chdir(dir_name.c_str());
 			if (cd_status < 0)
-				perror("chdir");
+				perror("cd");
 			break;
 		}
 		case JOBS :
+			printf("sorry, I have no job control\n");
 			break;
 		case FG :
+			printf("sorry, I have no job control\n");
 			break;
 		case BG :
+			printf("sorry, I have no job control\n");
 			break;
 		case EMPTY: //empty, just skip
 			break;
 		default : // execute external commands
-			exec_piped_commands(command_list);
+			exec_piped_commands(job);
 	}
 }
 
 
-void exec_piped_commands(std::list<Command> &command_list)
+void exec_piped_commands(Job &job)
 {
-	int number_of_pipes = (command_list.size() - 1);  
+	int number_of_pipes = (job.commands.size() - 1);  
 	int fds[2*number_of_pipes];
 	
 	// create all pipes
@@ -44,7 +47,7 @@ void exec_piped_commands(std::list<Command> &command_list)
 	}
 
 	unsigned int i = 0;
-	for (auto iter = command_list.begin(); iter != command_list.end(); iter++, i++){
+	for (auto iter = job.commands.begin(); iter != job.commands.end(); iter++, i++){
 		pid_t pid = fork();
 		if (pid == 0){
 			//child 
@@ -54,7 +57,7 @@ void exec_piped_commands(std::list<Command> &command_list)
 				dup2(fds[(i-1)*2], STDIN_FILENO);
 			}
 
-			if (i != command_list.size() -1 ){ // not the last command in the list
+			if (i != job.commands.size() -1 ){ // not the last command in the list
 				close(STDOUT_FILENO);
 				dup2(fds[i*2+1], STDOUT_FILENO);
 			}
@@ -78,7 +81,7 @@ void exec_piped_commands(std::list<Command> &command_list)
 			
 			if (execvp(iter->name.c_str(), args) < 0 ){ 
 				// cleanup if failed !
-				perror("child");
+				perror(iter->name.c_str());
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -93,8 +96,9 @@ void exec_piped_commands(std::list<Command> &command_list)
     }
 
 	int status;
-    for(size_t i = 0; i < command_list.size(); i++){
-        wait(&status);
+    for(size_t i = 0; i < job.commands.size(); i++){
+		if (!job.is_bg) // only wait if the job is a foreground job
+        	wait(&status);
         // if(WIFEXITED(status))
         // 	printf("child exited with = %d\n", WEXITSTATUS(status));
     }

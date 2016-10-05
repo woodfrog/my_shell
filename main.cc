@@ -3,31 +3,28 @@
 #include "prompt.h"
 #include "command_exec.h"
 #include "common.h"
+#include "job_control.h"
 #include <list>
 
-using namespace std;
-
 int main(void) {
+    
+    init_shell();
+  
     while (true) {
-    	// make the shell ignore Ctrl+C and Ctrl+Z
-        // signal(SIGTSTP, SIG_IGN); 
-		// signal(SIGINT, SIG_IGN);
         print_prompt();
 
-        std::list<Command> command_list;
+        // std::list<Command> command_list;
+        Job job;
 
-        parse_commonds(command_list);
-
-        // test for parser1 
-        // for (auto iter = command_list.begin(); iter != command_list.end(); iter++) {
+        parse_job(job);
+        
+        exec_job(job);
+        
+        // test for parser 
+        // for (auto iter = job.commands.begin(); iter != job.commands.end(); iter++) {
         //     printf("%s\n", iter->name.c_str());
         //     iter->show_parameters();
         // }
-        
-        exec_commands(command_list);
-        
-
-
     }
     return 0;
 }
