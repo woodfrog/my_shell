@@ -1,15 +1,17 @@
 #include "basic.h"
 
-/*this function is from the CNU shell tutorial, my original code simply */
+extern pid_t shell_pgid;
+extern struct termios shell_tmodes;
+extern int shell_terminal;
+extern int shell_is_interactive;
+  
+/*this function is from the CNU shell tutorial, my original code simply ignore the 
+signals, but when my shell can still be suspended using Ctrl+Z. I don't know why.. */
 void init_shell()
 {
-	pid_t shell_pgid;
-	struct termios shell_tmodes;
-	int shell_terminal;
-	int shell_is_interactive;
 	
 	shell_terminal = STDIN_FILENO;
-  	shell_is_interactive = isatty (shell_terminal);
+  shell_is_interactive = isatty (shell_terminal);
 	  
 	if (shell_is_interactive)
     {

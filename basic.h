@@ -1,9 +1,5 @@
-/*The declaration of the data structure to store all information of 
-  commonds in a single input.
- *The structure should be a list of commonds. And each command should
-   contains a list of paramters */
-   
-// I need a list for both parameters and commands!
+/* The declaration of the data structure to store all information of 
+   commonds in a single input. */
 
 #ifndef STRUCTURE_H
 #define STRUCTURE_H
@@ -54,6 +50,8 @@ class Job{
 public:
   std::list<Command> commands;
   bool is_bg;
+  pid_t pgid;                   /* process group ID */
+  struct termios tmodes;        /* saved terminal modes*/
 };
 
 

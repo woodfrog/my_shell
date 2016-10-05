@@ -6,6 +6,11 @@
 #include "job_control.h"
 #include <list>
 
+pid_t shell_pgid;
+struct termios shell_tmodes;
+int shell_terminal;
+int shell_is_interactive;
+    
 int main(void) {
     
     init_shell();

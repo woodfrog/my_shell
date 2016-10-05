@@ -1,5 +1,10 @@
 #include "command_exec.h"
 
+extern pid_t shell_pgid;
+extern struct termios shell_tmodes;
+extern int shell_terminal;
+extern int shell_is_interactive;
+
 void exec_job(Job &job)
 {
 	auto c = job.commands.front(); // if c is not external command, then command_list only has one element.
@@ -79,6 +84,19 @@ void exec_piped_commands(Job &job)
 			
 			args[index] = NULL; // the last one should be NULL
 			
+			// if (shell_is_interactive){
+			// 	pid = getpid();
+			// 	if (!job.is_bg)
+			// 		tcsetpgrp(shell_terminal, pid);
+			// 	//the child would inherit the signal control of parent, should reset it
+			// 	signal (SIGINT, SIG_DFL);
+			//     signal (SIGQUIT, SIG_DFL);
+			//     signal (SIGTSTP, SIG_DFL);
+			//     signal (SIGTTIN, SIG_DFL);
+			//     signal (SIGTTOU, SIG_DFL);
+			//     signal (SIGCHLD, SIG_DFL);
+			// }
+
 			if (execvp(iter->name.c_str(), args) < 0 ){ 
 				// cleanup if failed !
 				perror(iter->name.c_str());
@@ -94,6 +112,9 @@ void exec_piped_commands(Job &job)
 	for(int i = 0; i < 2*number_of_pipes; i++){ // close all pipes in parent
         close(fds[i]);
     }
+
+    // if (!shell_is_interactive)
+    	
 
 	int status;
     for(size_t i = 0; i < job.commands.size(); i++){
