@@ -11,12 +11,12 @@ void init_shell()
 {
 	
 	shell_terminal = STDIN_FILENO;
-  shell_is_interactive = isatty (shell_terminal);
+    shell_is_interactive = isatty (shell_terminal);
 	  
 	if (shell_is_interactive)
     {
       /* Loop until we are in the foreground.  */
-      while (tcgetpgrp (shell_terminal) != (shell_pgid = getpgrp ()))
+      while (tcgetpgrp (shell_terminal) != (shell_pgid = getpgrp ())) // set the global shell_pgid
         kill (- shell_pgid, SIGTTIN);
 
       /* Ignore interactive and job-control signals.  */
@@ -43,7 +43,7 @@ void init_shell()
 }
 
 
-void Command::add_parameter(Parameter p)
+void Command::add_parameter(std::string p)
 {   
     parameters.push_back(p);
 }
@@ -52,7 +52,7 @@ void Command::add_parameter(Parameter p)
 void Command::show_parameters()
 {
     for (auto iter = parameters.begin(); iter != parameters.end(); iter++){
-        std::cout << iter->content << std::endl; 
+        std::cout << *iter << std::endl; 
     }
 }
 
@@ -80,17 +80,18 @@ size_t Command::parameter_len()
 	return parameters.size();
 }
 
+bool Job::is_completed()
+{
+    for (auto iter = commands.begin(); iter != commands.end(); iter++)
+        if (!iter->completed)
+            return false;
+    return true;
+}
 
-
-// #ifdef DEBUG
-// using namespace std;
-// int main(void)
-// {    
-//     list<Command> l;
-//     Command c = Command("test");
-//     c.add_parameter(Parameter("spam"));
-//     c.add_parameter(Parameter("fooooooo"));
-//     c.show_parameters();
-//     return 0;
-// }
-// #endif
+bool Job::is_stopped()
+{
+    for (auto iter = commands.begin(); iter != commands.end(); iter++)
+        if (!iter->stopped)
+            return false;
+    return true;
+}

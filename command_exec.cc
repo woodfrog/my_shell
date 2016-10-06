@@ -5,7 +5,9 @@ extern struct termios shell_tmodes;
 extern int shell_terminal;
 extern int shell_is_interactive;
 
-void exec_job(Job &job)
+extern std::vector<Job&> job_table;
+
+void exec_command(Job &job)
 {
 	auto c = job.commands.front(); // if c is not external command, then command_list only has one element.
 	c.check_type();
@@ -15,7 +17,7 @@ void exec_job(Job &job)
 			break;
 		case CD :
 		{
-			std::string dir_name = c.parameters.front().content; // cd always has one parameter_len
+			std::string dir_name = c.parameters.front(); // cd always has one parameter_len
 			int cd_status = chdir(dir_name.c_str());
 			if (cd_status < 0)
 				perror("cd");
@@ -32,13 +34,13 @@ void exec_job(Job &job)
 			break;
 		case EMPTY: //empty, just skip
 			break;
-		default : // execute external commands
-			exec_piped_commands(job);
+		default : // execute external commands (the true job)
+			exec_job(job);
 	}
 }
 
 
-void exec_piped_commands(Job &job)
+void exec_job(Job &job)
 {
 	int number_of_pipes = (job.commands.size() - 1);  
 	int fds[2*number_of_pipes];
@@ -79,26 +81,30 @@ void exec_piped_commands(Job &job)
 				iter2!=iter->parameters.end(); 
 				iter2++, index++)
 			{
-				args[index] = (char*)iter2->content.c_str();			
+				args[index] = (char*)(iter2->c_str());			
 			}
 			
 			args[index] = NULL; // the last one should be NULL
 			
-			// if (shell_is_interactive){
-			// 	pid = getpid();
-			// 	if (!job.is_bg)
-			// 		tcsetpgrp(shell_terminal, pid);
-			// 	//the child would inherit the signal control of parent, should reset it
-			// 	signal (SIGINT, SIG_DFL);
-			//     signal (SIGQUIT, SIG_DFL);
-			//     signal (SIGTSTP, SIG_DFL);
-			//     signal (SIGTTIN, SIG_DFL);
-			//     signal (SIGTTOU, SIG_DFL);
-			//     signal (SIGCHLD, SIG_DFL);
-			// }
+			if (shell_is_interactive){
+				pid_t pgid, pid = getpid();
+				if (job.pgid == 0) // set the first process's pid as the group's pgid
+					pgid = pid;
+				setpgid(pid, pgid); // put the process specified by pid into the group specified by pgid
+				
+				if (!job.is_bg)
+					tcsetpgrp(shell_terminal, pid);
+					
+				//the child would inherit the signal control of parent, should reset it
+				signal (SIGINT, SIG_DFL);
+			    signal (SIGQUIT, SIG_DFL);
+			    signal (SIGTSTP, SIG_DFL);
+			    signal (SIGTTIN, SIG_DFL);
+			    signal (SIGTTOU, SIG_DFL);
+			    signal (SIGCHLD, SIG_DFL);
+			}
 
 			if (execvp(iter->name.c_str(), args) < 0 ){ 
-				// cleanup if failed !
 				perror(iter->name.c_str());
 				exit(EXIT_FAILURE);
 			}
@@ -107,20 +113,31 @@ void exec_piped_commands(Job &job)
 		else if (pid < 0){
 			perror("fork");
 		}
+		else{
+			/* in parent process */
+			
+			iter->pid = pid; // set the pid for each forked processes in parent process
+			printf("set pid for %d\n", iter->pid);
+			if (shell_is_interactive){
+				if (job.pgid == 0)
+					job.pgid = pid;
+				setpgid(pid, job.pgid); // shell also put the process specified by pid into the correct group
+			}
+			job_table.push_back(job); //insert the job into job talbe
+		}
 	}
+	
 
 	for(int i = 0; i < 2*number_of_pipes; i++){ // close all pipes in parent
         close(fds[i]);
     }
 
-    // if (!shell_is_interactive)
-    	
+    if (!shell_is_interactive)
+		wait_for_job(job);
+	else if (!job.is_bg)
+		put_job_foreground(job);
+		// do nothing, if in background, we just don't wait this job and continue the parent.
 
-	int status;
-    for(size_t i = 0; i < job.commands.size(); i++){
-		if (!job.is_bg) // only wait if the job is a foreground job
-        	wait(&status);
-        // if(WIFEXITED(status))
-        // 	printf("child exited with = %d\n", WEXITSTATUS(status));
-    }
 }
+
+

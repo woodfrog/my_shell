@@ -19,28 +19,24 @@ enum CommandType{
     EMPTY
 };
 
-class Parameter{
-public:
-    std::string content;
-    
-    Parameter(char *content){
-        this->content = content;
-    }
-};
-
 
 class Command{
 public:
     std::string name;
-    std::list<Parameter> parameters;
+    std::list<std::string> parameters;
     CommandType type;
+    bool is_process; // true if this is a external command
+    bool completed = 0;
+    bool stopped = 0;
+    pid_t pid;
+    int status;
     
-    Command(){}
+    Command(): pid(0) {}
     
-    Command(char *name){
+    Command(char *name): pid(0){
         this->name = name;
     }
-    void add_parameter(Parameter p);
+    void add_parameter(std::string p);
     void show_parameters();
     CommandType check_type();
     size_t parameter_len();
@@ -48,10 +44,15 @@ public:
 
 class Job{
 public:
+  std::string command_line;
   std::list<Command> commands;
-  bool is_bg;
+  bool is_bg;                   /* the job is in background or not */
   pid_t pgid;                   /* process group ID */
   struct termios tmodes;        /* saved terminal modes*/
+  
+  Job(): pgid(0){}
+  bool is_completed();
+  bool is_stopped();
 };
 
 
