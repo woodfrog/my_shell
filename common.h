@@ -9,6 +9,7 @@ be included in other headers in this project.*/
 #include <iostream>
 #include <stdbool.h>
 #include <string>
+#include <vector>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -19,8 +20,6 @@ be included in other headers in this project.*/
 #include <termios.h>
 
 // #define DEBUG 
-
-
 
 
 #endif

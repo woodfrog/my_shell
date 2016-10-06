@@ -6,8 +6,8 @@ CFLAGS  = -g -Wall -std=c++11
 all: my_shell
 
 
-my_shell:  main.o command_parser.o command_exec.o basic.o prompt.o
-	$(CC) $(CFLAGS) -o my_shell command_parser.o command_exec.o basic.o prompt.o main.o
+my_shell:  main.o command_parser.o command_exec.o basic.o prompt.o job_control.o
+	$(CC) $(CFLAGS) -o my_shell command_parser.o command_exec.o basic.o prompt.o main.o job_control.o
 
 
 main.o: main.cc

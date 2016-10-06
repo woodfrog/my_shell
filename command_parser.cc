@@ -32,12 +32,13 @@ bool handle_bg_symbol(char *s)
 }
 
 
-void parse_job(Job &job)
+void parse_command(Job &job)
 {
 	char line[80], line_copy[80];
 	fgets(line, sizeof(line), stdin);
 	size_t len = strlen(line);
 	line[len-1] = '\0'; // throw the \n at the end which is captured by fgets
+	job.command_line = line;
 	job.is_bg = handle_bg_symbol(line);
 	strncpy(line_copy, line, sizeof(line_copy));
 
@@ -67,7 +68,7 @@ void parse_job(Job &job)
 				new_command = Command(token); // create a new command
 			}
 			else{
-				Parameter new_parameter = Parameter(token);
+				std::string new_parameter = token;
 				new_command.add_parameter(new_parameter); // add new para into current command
 			}
 		}
