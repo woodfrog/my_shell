@@ -46,12 +46,18 @@ class Job{
 public:
   std::string command_line;
   std::list<Command> commands;
+  std::string status;
   bool is_bg;                   /* the job is in background or not */
   pid_t pgid;                   /* process group ID */
   struct termios tmodes;        /* saved terminal modes*/
   Job* next;                    /* point to next job */
-
-  Job(): pgid(0){}
+  bool is_notified;             /* be true is has been notified to user, otherwise before each
+                                   prompt a notification for stopped job will be given*/
+  
+  Job(): pgid(0), next(NULL){
+      status = "Running";
+      is_notified = false;
+  }
   bool is_completed();
   bool is_stopped();
 };

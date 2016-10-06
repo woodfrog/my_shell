@@ -19,7 +19,6 @@ void init_shell()
       while (tcgetpgrp (shell_terminal) != (shell_pgid = getpgrp ())) // set the global shell_pgid
         kill (- shell_pgid, SIGTTIN);
 
-      printf("shell pgid :%d\n", shell_pgid );
       /* Ignore interactive and job-control signals.  */
       signal (SIGINT, SIG_IGN);
       signal (SIGQUIT, SIG_IGN);

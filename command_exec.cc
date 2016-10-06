@@ -24,13 +24,37 @@ void exec_command(Job *job)
 			break;
 		}
 		case JOBS :
-			printf("sorry, I have no job control\n");
+			print_job_info();
 			break;
 		case FG :
-			printf("sorry, I have no job control\n");
+			if (!first_job)
+				fprintf(stderr, "fg: no job can be put into foreground\n");
+			else if (c.parameter_len() == 0) // no specified job, and there is a job  
+				foreground_continue_job(first_job);
+			else{
+				std::string pgid_str = c.parameters.front();
+				pid_t pgid = atoi(pgid_str.c_str());
+				Job *job = find_job(pgid);
+				if (job)		
+					foreground_continue_job(job);
+				else
+					fprintf(stderr, "fg: no job can be put into foreground\n");
+			}
 			break;
 		case BG :
-			printf("sorry, I have no job control\n");
+			if (!first_job)
+				fprintf(stderr, "bg: no such job\n");
+			else if (c.parameter_len() == 0) // no specified job, and there is a job  
+				background_continue_job(first_job);
+			else{
+				std::string pgid_str = c.parameters.front();
+				pid_t pgid = atoi(pgid_str.c_str());
+				Job *job = find_job(pgid);
+				if (job)		
+					background_continue_job(job);
+				else
+					fprintf(stderr, "bg: no such job\n");
+			}
 			break;
 		case EMPTY: //empty, just skip
 			break;
@@ -44,6 +68,9 @@ void exec_job(Job *job)
 {
 	int number_of_pipes = (job->commands.size() - 1);  
 	int fds[2*number_of_pipes];
+
+	job->next = first_job; // insert the job at the head of the list
+	first_job = job;	
 	
 	// create all pipes
 	for (int i = 0; i < number_of_pipes; i++){
@@ -117,23 +144,15 @@ void exec_job(Job *job)
 			/* in parent process */
 			
 			iter->pid = pid; // set the pid for each forked processes in parent process
-			printf("set pid for %d\n", iter->pid);
 			if (shell_is_interactive){
 				if (job->pgid == 0)
 					job->pgid = pid;
 				setpgid(pid, job->pgid); // shell also put the process specified by pid into the correct group
 			}
-			if (!first_job) //insert the job into job talbe
-				first_job = job;
-			else{
-				Job* temp = first_job->next;
-				job->next = temp;
-				first_job = job;
-			}
 		}
 	}
 	
-
+	
 	for(int i = 0; i < 2*number_of_pipes; i++){ // close all pipes in parent
         close(fds[i]);
     }

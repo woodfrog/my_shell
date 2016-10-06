@@ -9,5 +9,15 @@ int mark_process_status(pid_t pid, int status);
 
 void put_job_foreground(Job* job);
 
+void update_status();
 
+void job_notification();
+
+void print_job_info();
+
+void foreground_continue_job(Job *job);
+
+void background_continue_job(Job *job);
+
+Job* find_job(pid_t pid);
 #endif

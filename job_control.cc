@@ -7,6 +7,24 @@ extern int shell_is_interactive;
 
 extern Job* first_job;
 
+Job* find_job(pid_t pgid)
+{
+    for (Job *j = first_job; j; j = j->next)
+        if (j->pgid == pgid)
+            return j;
+    return NULL;
+}
+
+void update_status()
+{
+    int status;
+    pid_t pid;
+    
+    do{
+        pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
+    }while (!mark_process_status(pid, status));
+}
+
 void wait_for_job(Job *job)
 {
 	int status;
@@ -16,7 +34,6 @@ void wait_for_job(Job *job)
 		pid = waitpid(WAIT_ANY, &status, WUNTRACED);
         if (pid < 0)
             perror("wait for job ");
-        printf("the pid returned is %d\n", (int)pid);
     } while( !mark_process_status(pid, status) && !job->is_stopped() && !job->is_completed());;
 }
 
@@ -27,7 +44,6 @@ void put_job_foreground(Job* job)
     
     wait_for_job(job);
     
-    printf("return the terminal to shell\n");
     tcsetpgrp(shell_terminal, shell_pgid);
     
     tcgetattr(shell_terminal, &job->tmodes);
@@ -35,26 +51,60 @@ void put_job_foreground(Job* job)
     
 }
 
+void foreground_continue_job(Job *job)
+{
+    //first of all, set the stopped flag for each process in the group to be false
+    for (auto iter = job->commands.begin(); iter != job->commands.end(); iter++)
+        iter->stopped = false;
+    job->is_notified = false;
+    
+    if (job->is_bg){ // is a background job
+        job->is_bg = false;         // change it to a foreground job
+    }
+    
+    tcsetpgrp(shell_terminal, job->pgid);
+    
+    if (job->status == "Stopped")
+        if (kill( -job->pgid, SIGCONT) < 0) // send the signal for continue to the whole group
+            perror("continue foreground");
+    
+    wait_for_job(job);
+        
+    // reset the shell terminal, put our shell back to the foreground
+    tcsetpgrp(shell_terminal, shell_pgid);
+}
+
+void background_continue_job(Job *job)
+{
+    job->is_bg = true;
+    for (auto iter = job->commands.begin(); iter != job->commands.end(); iter++)
+        iter->stopped = false;
+        
+    job->is_notified = false;
+    if (job->status == "Stopped"){
+        if (kill( -job->pgid, SIGCONT) < 0) // send the signal for continue to the whole group    
+            perror("continue background");
+        job->status = "Running";
+    }
+}
+
 int mark_process_status(pid_t pid, int status)
 {
     if (pid > 0){ // if pid is 0, no child has changed status, no need for check
         for (auto j  = first_job; j; j = j->next )
             for (auto iter_process = j->commands.begin(); iter_process!=j->commands.end(); iter_process++){
-                printf("process %d\n", (int)iter_process->pid);
                 if (iter_process->pid == pid){
                     // find the process whose status changed
-                    printf("find process %d\n", (int)pid);
                     iter_process->status = status;
                     if (WIFSTOPPED(status))
                     {
                         iter_process->stopped = true;
-                        printf("set stopped\n");
                     }
                     else{
                         iter_process->completed = true;
-                        if (WIFSIGNALED(status))
-                            fprintf(stderr, "%d: Terminated by signal %d. \n",
-                            (int)pid, WTERMSIG(iter_process->status));
+                        // if (WIFSIGNALED(status))
+                        //     fprintf(stderr, "%d: Terminated by signal %d. \n",
+                        //     (int)pid, WTERMSIG(iter_process->status));
                     }
                     return 0;                
                 }
@@ -64,4 +114,50 @@ int mark_process_status(pid_t pid, int status)
     }
     else
         return -1;
+}
+
+void job_notification()
+{
+    // update status for those have changed
+    update_status();
+    
+    Job *jnext, *jlast = NULL;
+    
+    
+    for(Job* j = first_job; j; j = jnext){
+        jnext = j->next;
+        
+        if(j->is_completed()){
+            if (j->is_bg) // show the notification only when the completed job is on background
+                std::cout << long(j->pgid) << "    Completed     "  <<  j->command_line << std::endl;
+            
+            /*delete it from the job list*/
+            if (jlast) // the deleted one is not the first in the list
+               jlast->next = jnext;
+            else // the deleted one is the first in the list
+               first_job = jnext;
+               
+            // if (jnext)
+            //     std::cout << "next is" << jnext->pgid << " " << jnext->command_line << std::endl;
+            
+            delete j; // delete the job
+        }
+        
+        else if(j->is_stopped() && !j->is_notified){
+            jlast = j;
+            std::cout << long(j->pgid) << "    Stopped     "  <<  j->command_line << std::endl;
+            j->status = "Stopped";
+            j->is_notified = true;
+        }
+        else
+            jlast = j;
+        // std::cout << "i'm alive here" << std::endl;
+    }
+}
+
+void print_job_info()
+{
+    for (Job *j = first_job; j; j = j->next){
+        std::cout << long(j->pgid) << "  "  << j->status << "   " <<  j->command_line << std::endl;
+    }
 }

@@ -16,6 +16,9 @@ int main(void)
     init_shell();    
       
     while (true) {
+        
+        job_notification();
+
         print_prompt();
 
         // std::list<Command> command_list;
