@@ -5,11 +5,11 @@ extern struct termios shell_tmodes;
 extern int shell_terminal;
 extern int shell_is_interactive;
 
-extern std::vector<Job&> job_table;
+extern Job* first_job;
 
-void exec_command(Job &job)
+void exec_command(Job *job)
 {
-	auto c = job.commands.front(); // if c is not external command, then command_list only has one element.
+	auto c = job->commands.front(); // if c is not external command, then command_list only has one element.
 	c.check_type();
 	switch(c.type){
 		case EXIT :
@@ -40,9 +40,9 @@ void exec_command(Job &job)
 }
 
 
-void exec_job(Job &job)
+void exec_job(Job *job)
 {
-	int number_of_pipes = (job.commands.size() - 1);  
+	int number_of_pipes = (job->commands.size() - 1);  
 	int fds[2*number_of_pipes];
 	
 	// create all pipes
@@ -54,7 +54,7 @@ void exec_job(Job &job)
 	}
 
 	unsigned int i = 0;
-	for (auto iter = job.commands.begin(); iter != job.commands.end(); iter++, i++){
+	for (auto iter = job->commands.begin(); iter != job->commands.end(); iter++, i++){
 		pid_t pid = fork();
 		if (pid == 0){
 			//child 
@@ -64,7 +64,7 @@ void exec_job(Job &job)
 				dup2(fds[(i-1)*2], STDIN_FILENO);
 			}
 
-			if (i != job.commands.size() -1 ){ // not the last command in the list
+			if (i != job->commands.size() -1 ){ // not the last command in the list
 				close(STDOUT_FILENO);
 				dup2(fds[i*2+1], STDOUT_FILENO);
 			}
@@ -87,12 +87,12 @@ void exec_job(Job &job)
 			args[index] = NULL; // the last one should be NULL
 			
 			if (shell_is_interactive){
-				pid_t pgid, pid = getpid();
-				if (job.pgid == 0) // set the first process's pid as the group's pgid
-					pgid = pid;
-				setpgid(pid, pgid); // put the process specified by pid into the group specified by pgid
+				pid_t pid = getpid();
+				if (job->pgid == 0) // set the first process's pid as the group's pgid
+					job->pgid = pid;
+				setpgid(pid, job->pgid); // put the process specified by pid into the group specified by pgid
 				
-				if (!job.is_bg)
+				if (!job->is_bg)
 					tcsetpgrp(shell_terminal, pid);
 					
 				//the child would inherit the signal control of parent, should reset it
@@ -119,11 +119,17 @@ void exec_job(Job &job)
 			iter->pid = pid; // set the pid for each forked processes in parent process
 			printf("set pid for %d\n", iter->pid);
 			if (shell_is_interactive){
-				if (job.pgid == 0)
-					job.pgid = pid;
-				setpgid(pid, job.pgid); // shell also put the process specified by pid into the correct group
+				if (job->pgid == 0)
+					job->pgid = pid;
+				setpgid(pid, job->pgid); // shell also put the process specified by pid into the correct group
 			}
-			job_table.push_back(job); //insert the job into job talbe
+			if (!first_job) //insert the job into job talbe
+				first_job = job;
+			else{
+				Job* temp = first_job->next;
+				job->next = temp;
+				first_job = job;
+			}
 		}
 	}
 	
@@ -132,9 +138,9 @@ void exec_job(Job &job)
         close(fds[i]);
     }
 
-    if (!shell_is_interactive)
+	    if (!shell_is_interactive)
 		wait_for_job(job);
-	else if (!job.is_bg)
+	else if (!job->is_bg)
 		put_job_foreground(job);
 		// do nothing, if in background, we just don't wait this job and continue the parent.
 

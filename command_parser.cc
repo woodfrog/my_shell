@@ -32,14 +32,14 @@ bool handle_bg_symbol(char *s)
 }
 
 
-void parse_command(Job &job)
+void parse_command(Job *job)
 {
 	char line[80], line_copy[80];
 	fgets(line, sizeof(line), stdin);
 	size_t len = strlen(line);
 	line[len-1] = '\0'; // throw the \n at the end which is captured by fgets
-	job.command_line = line;
-	job.is_bg = handle_bg_symbol(line);
+	job->command_line = line;
+	job->is_bg = handle_bg_symbol(line);
 	strncpy(line_copy, line, sizeof(line_copy));
 
 	std::string sep_string = "\t |\n"; 	
@@ -59,7 +59,7 @@ void parse_command(Job &job)
 									token - line_copy);
 		if (is_pipe){
 			// printf("pipe found between %s and %s\n", last_token, token);
-			job.commands.push_back(new_command); // add the last command into list
+			job->commands.push_back(new_command); // add the last command into list
 			new_command = Command(token); // create a new command
 		}
 		else{
@@ -74,7 +74,7 @@ void parse_command(Job &job)
 		}
 		last_token = token;
 	}
-	job.commands.push_back(new_command);
+	job->commands.push_back(new_command);
 }
 
 

@@ -3,11 +3,11 @@
 #include "common.h"
 #include "basic.h"
 
-void wait_for_job(Job &job);
+void wait_for_job(Job* job);
 
 int mark_process_status(pid_t pid, int status);
 
-void put_job_foreground(Job &job);
+void put_job_foreground(Job* job);
 
 
 #endif

@@ -49,7 +49,8 @@ public:
   bool is_bg;                   /* the job is in background or not */
   pid_t pgid;                   /* process group ID */
   struct termios tmodes;        /* saved terminal modes*/
-  
+  Job* next;                    /* point to next job */
+
   Job(): pgid(0){}
   bool is_completed();
   bool is_stopped();

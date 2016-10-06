@@ -9,7 +9,7 @@ struct termios shell_tmodes;     // to store the shell's modes
 int shell_terminal;              // the file descriptor 
 int shell_is_interactive;
 
-std::vector<Job&> job_table;
+Job* first_job = NULL;
 
 int main(void) 
 {
@@ -19,7 +19,7 @@ int main(void)
         print_prompt();
 
         // std::list<Command> command_list;
-        Job job = new Job()
+        Job *job = new Job;
 
         parse_command(job);
         

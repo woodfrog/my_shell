@@ -19,13 +19,14 @@ void init_shell()
       while (tcgetpgrp (shell_terminal) != (shell_pgid = getpgrp ())) // set the global shell_pgid
         kill (- shell_pgid, SIGTTIN);
 
+      printf("shell pgid :%d\n", shell_pgid );
       /* Ignore interactive and job-control signals.  */
       signal (SIGINT, SIG_IGN);
       signal (SIGQUIT, SIG_IGN);
       signal (SIGTSTP, SIG_IGN);
       signal (SIGTTIN, SIG_IGN);
       signal (SIGTTOU, SIG_IGN);
-      signal (SIGCHLD, SIG_IGN);
+      // signal (SIGCHLD, SIG_IGN);
 
       /* Put ourselves in our own process group.  */
       shell_pgid = getpid ();
