@@ -6,9 +6,9 @@
 #include "job_control.h"
 #include <list>
 
-pid_t shell_pgid;
-struct termios shell_tmodes;
-int shell_terminal;
+pid_t shell_pgid;                // the process group ID of shell
+struct termios shell_tmodes;     // to store the shell's modes
+int shell_terminal;              // the file descriptor 
 int shell_is_interactive;
     
 int main(void) {
