@@ -1,10 +1,9 @@
 #include "prompt.h"
 
 
-
+/*get the last dir name and put it into last_dir*/
 void adjust_dir_name(char *abs_dir, char *last_dir)
 {
-    /*get the last dir name and put it into last_dir*/
     char *p1 = abs_dir;
     char *p2;
     
@@ -30,11 +29,3 @@ void print_prompt()
     
     printf("[%s@%s]: %s $ ", username, hostname, last_dir);
 }
-
-#ifdef DEBUG
-int main(void)
-{
-    print_prompt();
-    return 0;
-}
-#endif

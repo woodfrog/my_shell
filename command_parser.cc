@@ -54,11 +54,9 @@ void parse_command(Job *job)
 		 token;
 		 token = strtok_r(NULL, sep, &brk_t))
 	{
-		// printf("toke name :%s\n", token);
 		bool is_pipe = find_pipe(line, last_token - line_copy, 
 									token - line_copy);
 		if (is_pipe){
-			// printf("pipe found between %s and %s\n", last_token, token);
 			job->commands.push_back(new_command); // add the last command into list
 			new_command = Command(token); // create a new command
 		}
@@ -78,38 +76,4 @@ void parse_command(Job *job)
 }
 
 
-#ifdef DEBUG
-using namespace std;
-int main()
-{
-	while(true){
-		list<Command> cl;
-		parse_commond(cl);
-		for (auto iter = cl.begin(); iter!=cl.end(); ++iter){
-			iter->check_type();
-			// execute_command(*iter);
-			cout << "the command name:" << iter->name << "type:" << iter->type << endl;
-		}		
-	}
-}
-#endif
 
-
-// int main()
-// {
-// 	char test[80], blah[80];
-// 	char *sep = "\\/:;=-";
-// 	char *word, *phrase, *brkt, *brkb;
-// 	printf("address of the init str:%p\n", test);
-		 
-// 	strcpy(test, "This;is.a:test:of=the/string\\tokenizer-function.");
-		 
-// 	for (word = strtok_r(test, sep, &brkt);
-// 		word;
-// 		 word = strtok_r(NULL, sep, &brkt))
-// 	{
-// 		printf("address is:%p, content:%s\n", word, word);
-// 	}
-
-// 	return 0;
-// }

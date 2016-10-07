@@ -27,9 +27,9 @@ void exec_command(Job *job)
 			print_job_info();
 			break;
 		case FG :
-			if (!first_job)
+			if (!first_job) // no job
 				fprintf(stderr, "fg: no job can be put into foreground\n");
-			else if (c.parameter_len() == 0) // no specified job, and there is a job  
+			else if (c.parameter_len() == 0) // no specified job, fg the default one  
 				foreground_continue_job(first_job);
 			else{
 				std::string pgid_str = c.parameters.front();
@@ -42,9 +42,9 @@ void exec_command(Job *job)
 			}
 			break;
 		case BG :
-			if (!first_job)
+			if (!first_job) // no job
 				fprintf(stderr, "bg: no such job\n");
-			else if (c.parameter_len() == 0) // no specified job, and there is a job  
+			else if (c.parameter_len() == 0) // no specified job, bg the default one  
 				background_continue_job(first_job);
 			else{
 				std::string pgid_str = c.parameters.front();
@@ -63,7 +63,7 @@ void exec_command(Job *job)
 	}
 }
 
-
+/* This function is kind of complicated. And can be restructured later. */
 void exec_job(Job *job)
 {
 	int number_of_pipes = (job->commands.size() - 1);  
@@ -72,7 +72,7 @@ void exec_job(Job *job)
 	job->next = first_job; // insert the job at the head of the list
 	first_job = job;	
 	
-	// create all pipes
+	// create all pipes for children processes
 	for (int i = 0; i < number_of_pipes; i++){
 		if ( pipe(fds + i*2) < 0){
 			perror("pipe");
@@ -84,7 +84,7 @@ void exec_job(Job *job)
 	for (auto iter = job->commands.begin(); iter != job->commands.end(); iter++, i++){
 		pid_t pid = fork();
 		if (pid == 0){
-			//child 
+			/* child */
 			
 			if (i != 0){ // not the first command in the list
 				close(STDIN_FILENO);
@@ -100,19 +100,19 @@ void exec_job(Job *job)
         		close(fds[i]);
     		}
 			
+			/* set up the args for exec */
 			char *args[ 2 + iter->parameter_len()]; // one for command name, one for NULL
 			args[0] = (char*)iter->name.c_str();
 			size_t index = 1;
-			
 			for(auto iter2 = iter->parameters.begin(); 
 				iter2!=iter->parameters.end(); 
 				iter2++, index++)
 			{
 				args[index] = (char*)(iter2->c_str());			
 			}
-			
 			args[index] = NULL; // the last one should be NULL
 			
+
 			if (shell_is_interactive){
 				pid_t pid = getpid();
 				if (job->pgid == 0) // set the first process's pid as the group's pgid
@@ -122,7 +122,8 @@ void exec_job(Job *job)
 				if (!job->is_bg)
 					tcsetpgrp(shell_terminal, pid);
 					
-				//the child would inherit the signal control of parent, should reset it
+				// the child would inherit the signal control of parent, need to reset it
+				// to default or it would ignore all the signals 
 				signal (SIGINT, SIG_DFL);
 			    signal (SIGQUIT, SIG_DFL);
 			    signal (SIGTSTP, SIG_DFL);
@@ -141,7 +142,7 @@ void exec_job(Job *job)
 			perror("fork");
 		}
 		else{
-			/* in parent process */
+			/* parent */
 			
 			iter->pid = pid; // set the pid for each forked processes in parent process
 			if (shell_is_interactive){
@@ -157,12 +158,15 @@ void exec_job(Job *job)
         close(fds[i]);
     }
 
-	    if (!shell_is_interactive)
+    // if the shell is not in foreground, can only wait for job and cannot put it into
+    // foreground or background since the shell has no control to the terminal.
+	if (!shell_is_interactive) 
 		wait_for_job(job);
+
 	else if (!job->is_bg)
 		put_job_foreground(job);
-		// do nothing, if in background, we just don't wait this job and continue the parent.
 
+	// do nothing for background job. We just don't wait this job and continue the parent.
 }
 
 

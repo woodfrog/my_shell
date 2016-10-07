@@ -21,6 +21,8 @@ void update_status()
     pid_t pid;
     
     do{
+        /* choose the option WNOHANG | WUNTRACED since we only need check the status of 
+            children processes but don't need to wait for them to change state */
         pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
     }while (!mark_process_status(pid, status));
 }
@@ -31,10 +33,41 @@ void wait_for_job(Job *job)
 	pid_t pid;
 	
 	do{
+        /* choose the option WUNTRACED since we need to wait until some child's status
+            changed and then we deal with the change by calling mark_process_status */
 		pid = waitpid(WAIT_ANY, &status, WUNTRACED);
         if (pid < 0)
             perror("wait for job ");
     } while( !mark_process_status(pid, status) && !job->is_stopped() && !job->is_completed());;
+}
+
+
+int mark_process_status(pid_t pid, int status)
+{
+    if (pid > 0){ // if pid is 0, no child has changed status, no need for check
+        for (auto j  = first_job; j; j = j->next )
+            for (auto iter_process = j->commands.begin(); iter_process!=j->commands.end(); iter_process++){
+                if (iter_process->pid == pid){
+                    // find the specified process
+                    iter_process->status = status;
+                    if (WIFSTOPPED(status))
+                    {
+                        iter_process->stopped = true;
+                    }
+                    else{
+                        iter_process->completed = true;
+                        // if (WIFSIGNALED(status))
+                        //     fprintf(stderr, "%d: Terminated by signal %d. \n",
+                        //     (int)pid, WTERMSIG(iter_process->status));
+                    }
+                    return 0;                
+                }
+            }
+        fprintf(stderr, "NO child process %d. \n", (int)pid);
+        return -1;  
+    }
+    else
+        return -1;
 }
 
 
@@ -50,6 +83,7 @@ void put_job_foreground(Job* job)
     tcsetattr(shell_terminal, TCSADRAIN, &shell_tmodes);
     
 }
+
 
 void foreground_continue_job(Job *job)
 {
@@ -74,6 +108,7 @@ void foreground_continue_job(Job *job)
     tcsetpgrp(shell_terminal, shell_pgid);
 }
 
+
 void background_continue_job(Job *job)
 {
     job->is_bg = true;
@@ -88,33 +123,6 @@ void background_continue_job(Job *job)
     }
 }
 
-int mark_process_status(pid_t pid, int status)
-{
-    if (pid > 0){ // if pid is 0, no child has changed status, no need for check
-        for (auto j  = first_job; j; j = j->next )
-            for (auto iter_process = j->commands.begin(); iter_process!=j->commands.end(); iter_process++){
-                if (iter_process->pid == pid){
-                    // find the process whose status changed
-                    iter_process->status = status;
-                    if (WIFSTOPPED(status))
-                    {
-                        iter_process->stopped = true;
-                    }
-                    else{
-                        iter_process->completed = true;
-                        // if (WIFSIGNALED(status))
-                        //     fprintf(stderr, "%d: Terminated by signal %d. \n",
-                        //     (int)pid, WTERMSIG(iter_process->status));
-                    }
-                    return 0;                
-                }
-            }
-        fprintf(stderr, "NO child process %d. \n", (int)pid);
-        return -1;  
-    }
-    else
-        return -1;
-}
 
 void job_notification()
 {
@@ -129,29 +137,25 @@ void job_notification()
         
         if(j->is_completed()){
             if (j->is_bg) // show the notification only when the completed job is on background
-                std::cout << long(j->pgid) << "    Completed     "  <<  j->command_line << std::endl;
+                std::cout << long(j->pgid) << "  Completed  "  <<  j->command_line << std::endl;
             
-            /*delete it from the job list*/
+            /* delete it from the job list */
             if (jlast) // the deleted one is not the first in the list
                jlast->next = jnext;
             else // the deleted one is the first in the list
                first_job = jnext;
                
-            // if (jnext)
-            //     std::cout << "next is" << jnext->pgid << " " << jnext->command_line << std::endl;
-            
-            delete j; // delete the job
+            delete j; // delete the job since it has completed
         }
         
         else if(j->is_stopped() && !j->is_notified){
             jlast = j;
-            std::cout << long(j->pgid) << "    Stopped     "  <<  j->command_line << std::endl;
+            std::cout << long(j->pgid) << "  Stopped  "  <<  j->command_line << std::endl;
             j->status = "Stopped";
             j->is_notified = true;
         }
         else
             jlast = j;
-        // std::cout << "i'm alive here" << std::endl;
     }
 }
 

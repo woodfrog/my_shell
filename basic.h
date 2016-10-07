@@ -1,5 +1,4 @@
-/* The declaration of the data structure to store all information of 
-   commonds in a single input. */
+/* The basic functions and data structure for the shell */
 
 #ifndef STRUCTURE_H
 #define STRUCTURE_H
@@ -25,22 +24,25 @@ public:
     std::string name;
     std::list<std::string> parameters;
     CommandType type;
-    bool is_process; // true if this is a external command
-    bool completed = 0;
+    bool is_process;                /* true if this is a external command */
+    bool completed = 0; 
     bool stopped = 0;
-    pid_t pid;
-    int status;
+    pid_t pid;                      /* process id */
+    int status;                     
     
     Command(): pid(0) {}
     
     Command(char *name): pid(0){
         this->name = name;
     }
+
+    /* helper functions */
     void add_parameter(std::string p);
     void show_parameters();
     CommandType check_type();
     size_t parameter_len();
 };
+
 
 class Job{
 public:
@@ -58,8 +60,9 @@ public:
       status = "Running";
       is_notified = false;
   }
-  bool is_completed();
-  bool is_stopped();
+
+  bool is_completed(); /* check whether the job is completed */
+  bool is_stopped();   /* check whether the job is stopped */
 };
 
 

@@ -1,23 +1,41 @@
+/* Functions for handling job control. Some details references the GNU shell tutorial*/
+
 #ifndef JOB_CONTROL_H
 #define JOB_CONTROL_H
 #include "common.h"
 #include "basic.h"
 
-void wait_for_job(Job* job);
+/* find the job specified by its process group id in the job list */
+Job* find_job					(pid_t pid);
 
-int mark_process_status(pid_t pid, int status);
+/* wait for the specified job */
+void wait_for_job				(Job* job);
 
-void put_job_foreground(Job* job);
+/* continue the specified job and put it in foreground */
+void foreground_continue_job	(Job *job);
 
-void update_status();
+/* continue the specified job and put it in background */
+void background_continue_job	(Job *job);
 
-void job_notification();
+/* put the specified job in foreground */
+void put_job_foreground			(Job* job);
 
-void print_job_info();
+/* find the specified process and change its status information */
+int mark_process_status			(pid_t pid, int status);
 
-void foreground_continue_job(Job *job);
+/* notify the user if some job's status has changed(e.g. stopped or completed)
+	this function calls the update_status to update the status for each process
+	whose status has changed but hasn't been waited yet. */
+void job_notification			();
 
-void background_continue_job(Job *job);
+/* update the status of all processes before we type a new prompt
+   but this function is not blocking. If there is no child whose status 
+   changed before this moment we just do nothing. */
+void update_status				();
 
-Job* find_job(pid_t pid);
+/* the function for the internal command jobs, to print out all non-completed job's 
+	information in stdout*/
+void print_job_info				();
+
+
 #endif
