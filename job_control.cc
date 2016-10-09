@@ -24,7 +24,7 @@ void update_status()
         /* choose the option WNOHANG | WUNTRACED since we only need check the status of 
             children processes but don't need to wait for them to change state */
         pid = waitpid(WAIT_ANY, &status, WUNTRACED | WNOHANG);
-    }while (!mark_process_status(pid, status));
+    }while (!set_process_status(pid, status));
 }
 
 void wait_for_job(Job *job)
@@ -38,11 +38,11 @@ void wait_for_job(Job *job)
 		pid = waitpid(WAIT_ANY, &status, WUNTRACED);
         if (pid < 0)
             perror("wait for job ");
-    } while( !mark_process_status(pid, status) && !job->is_stopped() && !job->is_completed());;
+    } while( !set_process_status(pid, status) && !job->is_stopped() && !job->is_completed());;
 }
 
 
-int mark_process_status(pid_t pid, int status)
+int set_process_status(pid_t pid, int status)
 {
     if (pid > 0){ // if pid is 0, no child has changed status, no need for check
         for (auto j  = first_job; j; j = j->next )
@@ -50,15 +50,11 @@ int mark_process_status(pid_t pid, int status)
                 if (iter_process->pid == pid){
                     // find the specified process
                     iter_process->status = status;
-                    if (WIFSTOPPED(status))
-                    {
+                    if (WIFSTOPPED(status)){
                         iter_process->stopped = true;
                     }
                     else{
                         iter_process->completed = true;
-                        // if (WIFSIGNALED(status))
-                        //     fprintf(stderr, "%d: Terminated by signal %d. \n",
-                        //     (int)pid, WTERMSIG(iter_process->status));
                     }
                     return 0;                
                 }
@@ -80,7 +76,7 @@ void put_job_foreground(Job* job)
     tcsetpgrp(shell_terminal, shell_pgid);
     
     tcgetattr(shell_terminal, &job->tmodes);
-    tcsetattr(shell_terminal, TCSADRAIN, &shell_tmodes);
+    tcsetattr(shell_terminal, TCSADRAIN, &shell_tmodes); // restore the terminal modes
     
 }
 

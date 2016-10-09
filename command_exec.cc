@@ -38,7 +38,7 @@ void exec_command(Job *job)
 				if (job)		
 					foreground_continue_job(job);
 				else
-					fprintf(stderr, "fg: no job can be put into foreground\n");
+					fprintf(stderr, "fg: no such job can be put into foreground\n");
 			}
 			break;
 		case BG :

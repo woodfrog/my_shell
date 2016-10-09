@@ -1,4 +1,6 @@
-/* Functions for handling job control. Some details references the GNU shell tutorial*/
+/* Functions for handling job control. Some details references the GNU shell tutorial. And
+the mainly referencing part is in the function update_status(the option of waitpid which is 
+WNOHANG | WUNTRACED for updating the info of children without blocking the parent) */
 
 #ifndef JOB_CONTROL_H
 #define JOB_CONTROL_H
@@ -21,7 +23,7 @@ void background_continue_job	(Job *job);
 void put_job_foreground			(Job* job);
 
 /* find the specified process and change its status information */
-int mark_process_status			(pid_t pid, int status);
+int set_process_status			(pid_t pid, int status);
 
 /* notify the user if some job's status has changed(e.g. stopped or completed)
 	this function calls the update_status to update the status for each process

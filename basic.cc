@@ -44,7 +44,6 @@ void init_shell()
 
       /* Grab control of the terminal.  */
       tcsetpgrp (shell_terminal, shell_pgid);
-
       /* Save default terminal attributes for shell.  */
       tcgetattr (shell_terminal, &shell_tmodes);
   }
