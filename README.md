@@ -1,12 +1,14 @@
 # MyShell
 ------------------------
 
-This project implements a primitive UNIX shell with basic functions including:
- 
-1. internal commands such as **jobs, cd, exit**.
-2. external program execution such as **cat textfile | gzip -c | tail -n 10**.
+A mini-shell that supports majority of Unix terminal shell’s functionalities implemented with C++.
 
-The main difficulty is the implementation of *job control*. Core components are reviewied in the conceptions section.
+The following basic functions are implemented:
+ 
+1. internal commands, e.g. **jobs, cd, exit**.
+2. external program execution, e.g. **cat textfile | gzip -c | tail -n 10**.
+
+*job controls* was the most difficult implementation in this project. See the **conceptions** section for more details on core components implementation.
 
 ## Installation
 To compile the codes:
